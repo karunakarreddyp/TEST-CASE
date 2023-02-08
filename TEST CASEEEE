@@ -1,0 +1,77 @@
+@isTest 
+public class APICallsUtility_Test {
+    
+    @isTest 
+    private static void testMethod1() {
+        
+        Test.setMock(WebServiceMock.class, new integrationDecisionlogicComMockImpl());
+        
+        List<Account> accLst = new List<Account>();
+        accLst.add(new Account(FirstName = 'Test', LastName= 'Account', RecordTypeId = Schema.SObjectType.account.getRecordTypeInfosByName().get('Applicant').getRecordTypeId(), BillingPostalCode = 'R7A0A5'));
+        accLst.add(new Account(FirstName = 'Test', LastName= 'Account2', RecordTypeId = Schema.SObjectType.account.getRecordTypeInfosByName().get('Applicant').getRecordTypeId(), BillingPostalCode = 'R7A0A6'));
+        insert accLst;
+        
+		Account acc = [Select id, PersonContactId from Account Where id =: accLst[0].id];
+		        
+		       
+        Request_Code__c code = new Request_Code__c(Account__c = accLst[0].id);
+      	insert code;
+        
+        List<Id> recId = new List<Id>();
+        recId.add(code.id);
+
+        Test.startTest();
+        APICallsUtility apiCalls = new APICallsUtility();
+        apiCalls.callFoundationNotif();
+        
+        //apiCalls.getDL_requestCode();
+        
+        PageReference myVfPage = Page.DLiframe;
+        //est.setCurrentPage(myVfPage);
+        
+        // Put Id into the current page Parameters
+        ApexPages.currentPage().getParameters().put('id',accLst[0].Id);
+        ApexPages.currentPage().getParameters().put('customerid',accLst[0].PersonContactId);
+        
+        
+
+        //set page param first :: id :: Account ID
+        apiCalls.getDL_requestCode();
+        //apiCalls.callFoundationNotif();
+
+        APICallsUtility.callInvoc(recId);
+        Test.stopTest();
+        
+        //apiCalls.insertfa(falst);
+            
+    }
+    
+    @isTest
+    private static void multipleRecordCall(){
+        
+        List<Account> accLst = new List<Account>();
+        accLst.add(new Account(FirstName = 'Test', LastName= 'Account', RecordTypeId = Schema.SObjectType.account.getRecordTypeInfosByName().get('Applicant').getRecordTypeId(), BillingPostalCode = 'R7A0A5'));
+        //accLst.add(new Account(FirstName = 'Test', LastName= 'Account2', RecordTypeId = Schema.SObjectType.account.getRecordTypeInfosByName().get('Applicant').getRecordTypeId(), BillingPostalCode = 'R7A0A6'));
+        insert accLst;
+        
+		Account acc = [Select id, PersonContactId from Account Where id =: accLst[0].id];
+		system.debug('CustomerId::'+acc.PersonContactId);
+		
+        Test.startTest();
+		PageReference myVfPage = Page.DLiframe;
+        //est.setCurrentPage(myVfPage);
+        
+        // Put Id into the current page Parameters
+       	ApexPages.currentPage().getParameters().put('customerid',acc.PersonContactId); 
+		ApexPages.currentPage().getParameters().put('rc','K4KV2R');
+        ApexPages.currentPage().getParameters().put('s','1');
+        APICallsUtility apiCalls = new APICallsUtility();
+        
+        Test.setMock(WebServiceMock.class, new MultiReportMock_Test());
+		integrationDecisionlogicCom.DecisionLogic_x0020_API_x0020_ver2Soap testObject = new integrationDecisionlogicCom.DecisionLogic_x0020_API_x0020_ver2Soap();
+        apiCalls.DL_notificationParams();
+        
+        Test.stopTest();
+        STring response = '';
+    }
+}
